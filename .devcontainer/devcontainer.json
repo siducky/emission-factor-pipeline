@@ -1,0 +1,24 @@
+{
+    "name": "Emission Factor ETL Pipeline",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "PLATFORM": "amd64"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "eamodio.gitlens",
+                "mechatroner.rainbow-csv"
+            ]
+        }
+    },
+    "mounts": [
+        "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached"
+    ],
+    "postCreateCommand": "if [ -f pyproject.toml ]; then uv pip install --system -r pyproject.toml; else echo 'No pyproject.toml found, skipping.'; fi",
+    "remoteUser": "vscode"
+}
