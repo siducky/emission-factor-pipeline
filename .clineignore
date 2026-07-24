@@ -1,0 +1,16 @@
+# Ignore build artifacts and caches
+transformation/target/
+transformation/dbt_packages/
+transformation/logs/
+transformation/*.duckdb
+transformation/*.duckdb.wal
+
+# Ignore Python and virtual environments
+venv/
+__pycache__/
+*.pyc
+
+# Ignore local system files
+.DS_Store
+.env
+profiles.yml
