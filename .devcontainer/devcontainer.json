@@ -1,24 +1,33 @@
 {
     "name": "Emission Factor ETL Pipeline",
     "build": {
-        "dockerfile": "Dockerfile",
-        "args": {
-            "PLATFORM": "amd64"
-        }
+        "dockerfile": "Dockerfile"
     },
     "customizations": {
         "vscode": {
             "extensions": [
+                "saoudrizwan.claude-dev",
+                "altimate.vscode-dbt-power-user",
                 "ms-python.python",
-                "ms-python.vscode-pylance",
                 "eamodio.gitlens",
-                "mechatroner.rainbow-csv"
+                "mechatroner.rainbow-csv",
+                "charliermarsh.ruff"
             ]
         }
     },
     "mounts": [
-        "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached"
+        "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "if [ -f pyproject.toml ]; then uv pip install --system -r pyproject.toml; else echo 'No pyproject.toml found, skipping.'; fi",
+    "runArgs": [
+        "--env-file",
+        "${localWorkspaceFolder}/.env"
+    ],
+    "remoteEnv": {
+        "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+        "UV_LINK_MODE": "copy"
+    },
+    // Creates a local .venv inside your project folder where you have 100% permissions
+    "postCreateCommand": "if [ -f pyproject.toml ]; then uv venv --allow-existing && uv pip install -r pyproject.toml; fi",
     "remoteUser": "vscode"
 }
