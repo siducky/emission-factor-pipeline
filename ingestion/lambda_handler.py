@@ -3,12 +3,12 @@ import os
 import time
 
 import boto3
-from parsers import defra_parser, nve_parser
+from parsers import ademe_parser, defra_parser, nve_parser
 
 logger = logging.getLogger(__name__)
 s3_client = boto3.client("s3")
 BUCKET_NAME = os.getenv("S3_BUCKET")
-PARSERS = {"nve": nve_parser, "defra": defra_parser}
+PARSERS = {"ademe": ademe_parser, "nve": nve_parser, "defra": defra_parser}
 
 if not BUCKET_NAME:
     raise ValueError("S3_BUCKET environment variable is not set")
@@ -71,4 +71,4 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    lambda_handler({}, None)
+    lambda_handler({'sources': ['ademe']}, None)
