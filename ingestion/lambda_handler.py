@@ -3,12 +3,12 @@ import os
 import time
 
 import boto3
-from parsers import nve_parser
+from parsers import defra_parser, nve_parser
 
 logger = logging.getLogger(__name__)
 s3_client = boto3.client("s3")
 BUCKET_NAME = os.getenv("S3_BUCKET")
-PARSERS = {"nve": nve_parser}
+PARSERS = {"nve": nve_parser, "defra": defra_parser}
 
 if not BUCKET_NAME:
     raise ValueError("S3_BUCKET environment variable is not set")
@@ -31,18 +31,20 @@ def lambda_handler(event, context):
         start = time.perf_counter()
         try:
             logger.info("Running parser for %s...", source_name)
-            cleaned_csv = parser_module.parse_file()
-            file_path = f"bronze/{source_name}/all_years.csv"
-            s3_client.put_object(
-                Bucket=BUCKET_NAME,
-                Key=file_path,
-                Body=cleaned_csv,
-                ContentType="text/csv",
-            )
+            year_files = parser_module.parse_file()
+            for year_key, csv_data in year_files.items():
+                file_path = f"bronze/{source_name}/{year_key}/factors.csv"
+                s3_client.put_object(
+                    Bucket=BUCKET_NAME,
+                    Key=file_path,
+                    Body=csv_data,
+                    ContentType="text/csv",
+                )
             elapsed = time.perf_counter() - start
             logger.info(
-                "Successfully ingested %s in %.2fs",
+                "Successfully ingested %s (%d files) in %.2fs",
                 source_name,
+                len(year_files),
                 elapsed,
                 extra={"source": source_name,
                        "duration_s": elapsed, "status": "ok"},

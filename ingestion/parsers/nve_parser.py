@@ -7,12 +7,15 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-NVE_URL = os.getenv("NVE_URL")
-if not NVE_URL:
-    raise ValueError("NVE URL is not defined")
+
+def _get_nve_url() -> str:
+    url = os.getenv("NVE_URL")
+    if not url:
+        raise ValueError("NVE URL environment variable is not set")
+    return url
 
 
-def _find_column(columns: list, target: str) -> str | None:
+def _find_column(columns: list[str], target: str) -> str | None:
     """Locate a column by case-insensitive, whitespace-stripped header match."""
     try:
         return next(c for c in columns if str(c).strip().lower() == target.lower())
@@ -20,13 +23,21 @@ def _find_column(columns: list, target: str) -> str | None:
         return None
 
 
-def parse_file(url=NVE_URL) -> bytes:
-    """Parse NVE electricity grid emission factors and returns csv.
+def parse_file(url: str | None = None) -> dict[str, bytes]:
+    """Parse NVE electricity grid emission factors and returns per-year CSV bytes.
 
     Extracts the year and CO2 factor columns, casts to ``int`` and ``float`` respectively. 
     Adds a ``factor_type`` column:``Market-based`` for the *Varedeklarasjon* sheet, ``Location-based``
     for the *Klimadeklarasjon* sheet.
+    Splits the result by year and returns a dict mapping year string → CSV bytes.
+
+    Parameters
+    ----------
+    url : str, optional
+        URL to NVE Excel file. Falls back to ``NVE_URL`` env var.
     """
+    if url is None:
+        url = _get_nve_url()
     logger.info("Downloading NVE Electricity emission factors from %s", url)
     response = requests.get(url, timeout=30)
     response.raise_for_status()
@@ -58,9 +69,6 @@ def parse_file(url=NVE_URL) -> bytes:
             logger.warning(
                 "Sheet '%s': column 'CO2' not found in %s", sheet_name, columns)
 
-        if not year_col or not co2_col:
-            continue
-
         try:
             extracted = df[[year_col, co2_col]].copy()
         except KeyError:
@@ -71,8 +79,6 @@ def parse_file(url=NVE_URL) -> bytes:
             continue
 
         extracted.columns = ["year", "co2_per_kWh"]
-        extracted["year"] = extracted["year"].astype(int)
-        extracted["co2_per_kWh"] = extracted["co2_per_kWh"].astype(float)
         extracted["factor_type"] = factor_type
         frames.append(extracted)
         logger.info(
@@ -83,15 +89,27 @@ def parse_file(url=NVE_URL) -> bytes:
     if not frames:
         raise ValueError(
             "No data extracted from any sheet — NVE parser produced zero rows"
-        )
+        ) from None
 
     combined = pd.concat(frames, ignore_index=True)
     logger.info("Combined result: %d rows, columns=%s",
                 len(combined), list(combined.columns))
-    return combined.to_csv(index=False).encode("utf-8")
+
+    # Split by year into per-year CSVs
+    years = combined["year"].unique()
+    result: dict[str, bytes] = {}
+    for year_val in sorted(years):
+        year_df = combined[combined["year"] == year_val]
+        year_key = str(year_val)
+        result[year_key] = year_df.to_csv(index=False).encode("utf-8")
+        logger.info("Year %s: %d rows", year_key, len(year_df))
+
+    return result
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    data = parse_file()
-    print(data.decode("utf-8"))
+    result = parse_file()
+    for year_key, csv_bytes in result.items():
+        print(f"--- {year_key} ---")
+        print(csv_bytes.decode("utf-8"))
