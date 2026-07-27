@@ -71,4 +71,4 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    lambda_handler({'sources': ['ademe']}, None)
+    lambda_handler({}, None)
