@@ -13,4 +13,3 @@ __pycache__/
 # Ignore local system files
 .DS_Store
 .env
-profiles.yml
