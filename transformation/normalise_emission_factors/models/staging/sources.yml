@@ -1,0 +1,81 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: >
+      Raw emission factor data ingested from external sources and stored in S3.
+      Each source produces one CSV file per year in `bronze/{source_name}/{year}/factors.csv`.
+    schema: bronze
+    tables:
+      - name: nve
+        description: >
+          NVE (Norges vassdrags- og energidirektorat) Norwegian electricity grid
+          emission factors. Contains market-based and location-based factors.
+        config:
+          external_location: "s3://emission-factors-raw/bronze/nve/*/factors.csv"
+        columns:
+          - name: year
+            data_type: integer
+            description: "Calendar year the emission factor applies to."
+          - name: co2_per_kWh
+            data_type: double
+            description: "CO₂ emission factor in gCO₂/kWh."
+          - name: factor_type
+            data_type: varchar
+            description: "Market-based or Location-based classification."
+
+      - name: ademe
+        description: >
+          ADEME (Agence de la transition écologique) Base Carbone —
+          emission factors for sports equipment.
+        config:
+          external_location: "s3://emission-factors-raw/bronze/ademe/*/factors.csv"
+        columns:
+          - name: __id
+            data_type: integer
+            description: "Unique assigned id for each product."
+          - name: CodeFede
+            data_type: integer
+            description: "Code for each sport federation."
+          - name: Federation
+            data_type: varchar
+            description: "Name for each sport federation."
+          - name: "Produit à l'unité"
+            data_type: varchar
+            description: "Name for each sports equipment."
+          - name: "Facteur d'émission"
+            data_type: double
+            description: "CO₂ emission factor in gCO₂/pr piece."
+          - name: "Incertitude en %"
+            data_type: double
+            description: "Uncertainty"
+          - name: Remarques
+            data_type: varchar
+
+      - name: defra
+        description: >
+          DEFRA (Department for Environment, Food & Rural Affairs) UK GHG
+          conversion factors covering fuels, electricity, transport, waste, etc.
+        config:
+          external_location: "s3://emission-factors-raw/bronze/defra/*/factors.csv"
+        columns:
+          - name: ID
+            data_type: varchar
+          - name: Scope
+            data_type: varchar
+          - name: "Level 1"
+            data_type: varchar
+          - name: "Level 2"
+            data_type: varchar
+          - name: "Level 3"
+            data_type: varchar
+          - name: "Level 4"
+            data_type: varchar
+          - name: "Column Text"
+            data_type: varchar
+          - name: UOM
+            data_type: varchar
+          - name: "GHG/Unit"
+            data_type: varchar
+          - name: "GHG Conversion Factor 2025"
+            data_type: double

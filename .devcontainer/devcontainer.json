@@ -21,10 +21,11 @@
     ],
     "runArgs": [
         "--env-file",
-        "${localWorkspaceFolder}/.env"
+        "${localWorkspaceFolder}/.env",
+        "--memory=6g",
+        "--memory-swap=8g"
     ],
     "remoteEnv": {
-        "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
         "UV_LINK_MODE": "copy"
     },
     // Creates a local .venv inside your project folder where you have 100% permissions

@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: stg_nve
+    description: >
+      Staging model for NVE Norwegian electricity grid emission factors.
+      Contains market-based and location-based CO₂ factors per kWh.
+    columns:
+      - name: source_year
+        description: "Calendar year the emission factor applies to."
+        data_tests:
+          - not_null
+      - name: emission_factor_value
+        description: "CO₂ emission factor in gCO₂/kWh."
+        data_tests:
+          - not_null
+      - name: factor_type
+        description: "Market-based or Location-based classification."
+        data_tests:
+          - not_null
+      - name: source
+        description: "Source system identifier."
+        data_tests:
+          - not_null
+      - name: country_code
+        description: "ISO 3166-1 alpha-2 country code."
+        data_tests:
+          - not_null
+      - name: unit
+        description: "Unit of measurement for the emission factor."
+        data_tests:
+          - not_null
+      - name: valid_from
+        description: "Start date of validity period."
+        data_tests:
+          - not_null
+      - name: valid_to
+        description: "End date of validity period."
+        data_tests:
+          - not_null
+
+  - name: stg_ademe
+    description: >
+      Staging model for ADEME Base Carbone — French emission factors
+      for sports equipment. Column names translated from French to English.
+    columns:
+      - name: id
+        description: "Unique identifier for each product."
+        data_tests:
+          - unique
+          - not_null
+      - name: federation_code
+        description: "Code for each sport federation."
+        data_tests:
+          - not_null
+      - name: federation
+        description: "French name of the sport federation."
+        data_tests:
+          - not_null
+      - name: product_name
+        description: "Name of the sports equipment product."
+        data_tests:
+          - not_null
+      - name: emission_factor_value
+        description: "CO₂ emission factor in geC/piece."
+        data_tests:
+          - not_null
+      - name: uncertainty_pct
+        description: "Uncertainty percentage of the emission factor."
+      - name: notes
+        description: "Additional remarks."
+      - name: source
+        description: "Source system identifier."
+        data_tests:
+          - not_null
+      - name: country_code
+        description: "ISO 3166-1 alpha-2 country code."
+        data_tests:
+          - not_null
+      - name: unit
+        description: "Unit of measurement for the emission factor."
+        data_tests:
+          - not_null
+      - name: valid_from
+        description: "Start date of validity period."
+        data_tests:
+          - not_null
+      - name: valid_to
+        description: "End date of validity period."
+        data_tests:
+          - not_null

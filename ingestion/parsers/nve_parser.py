@@ -5,6 +5,8 @@ import os
 import pandas as pd
 import requests
 
+from ingestion.parsers.models import NveRawRow
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,6 +23,32 @@ def _find_column(columns: list[str], target: str) -> str | None:
         return next(c for c in columns if str(c).strip().lower() == target.lower())
     except StopIteration:
         return None
+
+
+def _validate_df(df: pd.DataFrame) -> None:
+    """Validate every row of an NVE DataFrame against ``NveRawRow``."""
+    errors: list[str] = []
+    row_count = 0
+    for row_idx, row in df.iterrows():
+        row_count += 1
+        try:
+            NveRawRow.model_validate(row.to_dict())
+        except Exception as e:
+            errors.append(f"Row {row_idx}: {e}")
+
+    if row_count == 0:
+        raise ValueError("NVE DataFrame is empty — no rows to validate")
+
+    if errors:
+        summary = "\n".join(errors[:20])
+        remainder = len(errors) - 20
+        if remainder > 0:
+            summary += f"\n... and {remainder} more row(s) with errors"
+        raise ValueError(
+            f"NVE validation failed: {len(errors)} / {row_count} rows invalid.\n{summary}"
+        )
+
+    logger.info("NVE validated: %d rows OK", row_count)
 
 
 def parse_file(url: str | None = None) -> dict[str, bytes]:
@@ -94,6 +122,9 @@ def parse_file(url: str | None = None) -> dict[str, bytes]:
     combined = pd.concat(frames, ignore_index=True)
     logger.info("Combined result: %d rows, columns=%s",
                 len(combined), list(combined.columns))
+
+    # Validate before splitting
+    _validate_df(combined)
 
     # Split by year into per-year CSVs
     years = combined["year"].unique()

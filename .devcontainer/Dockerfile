@@ -23,5 +23,11 @@ RUN ARCH=$(case ${platform} in amd64) echo "x86_64" ;; arm64) echo "aarch64" ;; 
     && ./aws/install \
     && rm -rf awscliv2.zip aws
 
+# Install DuckDB CLI explicitly via direct download
+RUN curl -L -o duckdb.zip https://github.com/duckdb/duckdb/releases/download/v1.4.5/duckdb_cli-linux-amd64.zip \
+    && unzip duckdb.zip \
+    && mv duckdb /usr/local/bin/duckdb \
+    && chmod +x /usr/local/bin/duckdb \
+    && rm duckdb.zip
 # Clean up apt cache to keep image small
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
