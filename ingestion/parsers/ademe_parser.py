@@ -71,8 +71,6 @@ def _validate_csv(raw: bytes) -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    from ingestion.logging_config import setup_logging
+    setup_logging()
     result = parse_file()
-    for year_key, csv_bytes in result.items():
-        print(f"--- {year_key} ---")
-        print(csv_bytes.decode("utf-8"))

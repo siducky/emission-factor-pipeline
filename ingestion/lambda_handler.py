@@ -70,5 +70,6 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    from ingestion.logging_config import setup_logging
+    setup_logging()
     lambda_handler({}, None)
