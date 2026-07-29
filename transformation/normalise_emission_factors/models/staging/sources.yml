@@ -77,5 +77,7 @@ sources:
             data_type: varchar
           - name: "GHG/Unit"
             data_type: varchar
-          - name: "GHG Conversion Factor 2025"
+          - name: "GHG Conversion Factor"
             data_type: double
+          - name: year
+            data_type: integer

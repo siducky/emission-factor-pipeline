@@ -68,6 +68,7 @@ class DefraRawRow(BaseModel):
     uom: str = Field(alias="UOM")
     scope: str = Field(alias="Scope")
     ghg_unit: str = Field(alias="GHG/Unit")
+    year: int = Field(ge=2000, le=2100)
     model_config = {"populate_by_name": True, "extra": "ignore"}
 
     @field_validator("level_1", "level_2", "level_3", "uom", "scope", "ghg_unit")

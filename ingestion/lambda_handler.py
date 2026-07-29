@@ -72,4 +72,4 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     from ingestion.logging_config import setup_logging
     setup_logging()
-    lambda_handler({}, None)
+    lambda_handler({'sources': ['ademe']}, None)

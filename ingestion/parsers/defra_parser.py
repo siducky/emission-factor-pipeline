@@ -69,7 +69,6 @@ def _validate_df(df: pd.DataFrame, year: int) -> pd.DataFrame:
         return df.iloc[:0]  # return empty DataFrame, don't break
 
     valid_rows: list[dict] = []
-    skipped_rows: list[dict] = []
     invalid_count = 0
     row_count = 0
 
@@ -89,7 +88,8 @@ def _validate_df(df: pd.DataFrame, year: int) -> pd.DataFrame:
             "GHG Conversion Factor": factor_val,
             "UOM": row.get("UOM", ""),
             "Scope": row.get("Scope", ""),
-            "GHG/Unit": row.get("GHG/Unit", "")
+            "GHG/Unit": row.get("GHG/Unit", ""),
+            "year": year
         }
         if pd.isna(record["Level 3"]) or record["Level 3"] == "":
             record["Level 3"] = record["Level 2"]

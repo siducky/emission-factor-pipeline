@@ -6,38 +6,79 @@ models:
       Staging model for NVE Norwegian electricity grid emission factors.
       Contains market-based and location-based CO₂ factors per kWh.
     columns:
-      - name: source_year
-        description: "Calendar year the emission factor applies to."
+      - name: id
+        description: "Unique UUID identifier for each row."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: factor_name
+        description: "Descriptive name combining source and factor type."
         data_tests:
           - not_null
-      - name: emission_factor_value
-        description: "CO₂ emission factor in gCO₂/kWh."
+
+      - name: gCO2e_per_unit
+        description: 'CO₂ emission factor in gCO₂/kWh.'
         data_tests:
           - not_null
-      - name: factor_type
-        description: "Market-based or Location-based classification."
-        data_tests:
-          - not_null
-      - name: source
-        description: "Source system identifier."
-        data_tests:
-          - not_null
-      - name: country_code
-        description: "ISO 3166-1 alpha-2 country code."
-        data_tests:
-          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: " > 0"
+
       - name: unit
-        description: "Unit of measurement for the emission factor."
+        description: "Unit of measurement (kWh)."
         data_tests:
           - not_null
-      - name: valid_from
-        description: "Start date of validity period."
+          - accepted_values:
+              arguments:
+                values: ["kWh"]
+
+      - name: ghg_scope
+        description: "GHG Protocol scope classification."
         data_tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: ["Scope 2"]
+
+      - name: country_code
+        description: "ISO 3166-1 alpha-2 country code (NO)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["NO"]
+
+      - name: source
+        description: "Source system identifier (nve)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["nve"]
+
+      - name: source_year
+        description: 'Calendar year the emission factor applies to.'
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 2000 AND 2100"
+
       - name: valid_to
         description: "End date of validity period."
         data_tests:
           - not_null
+
+      - name: valid_from
+        description: "Start date of validity period."
+        data_tests:
+          - not_null
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: valid_from_before_valid_to
+          arguments:
+            expression: "valid_from <= valid_to"
 
   - name: stg_ademe
     description: >
@@ -49,7 +90,63 @@ models:
         data_tests:
           - unique
           - not_null
-      - name: federation_code
+      - name: factor_name
+        description: "Product name (in French)."
+        data_tests:
+          - not_null
+      - name: gCO2e_per_unit
+        description: "CO₂ emission factor in either kg or gCO₂/piece "
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: " >= 0"
+      - name: unit
+        description: "Unit of measurement (piece)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["piece"]
+      - name: ghg_scope
+        description: "GHG Protocol scope classification."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Scope 3"]
+      - name: country_code
+        description: "ISO 3166-1 alpha-2 country code (GL)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["GL"]
+      - name: source
+        description: "Source system identifier (ademe)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["ademe"]
+      - name: source_year
+        description: "Calendar year the emission factor applies to (2016)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [2016]
+      - name: valid_from
+        description: "Start date of validity period (2016-01-01)."
+        data_tests:
+          - not_null
+      - name: valid_to
+        description: "End date of validity period (infinity)."
+        data_tests:
+          - not_null
+      - name: uncertainty_pct
+        description: "Uncertainty percentage of the emission factor."
+      - name: sport_federation_code
         description: "Code for each sport federation."
         data_tests:
           - not_null
@@ -57,35 +154,87 @@ models:
         description: "French name of the sport federation."
         data_tests:
           - not_null
-      - name: product_name
-        description: "Name of the sports equipment product."
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: valid_from_before_valid_to_ademe
+          arguments:
+            expression: "valid_from <= valid_to"
+
+  - name: stg_defra
+    description: >
+      Staging model for DEFRA UK GHG conversion factors.
+      Filters to kg CO₂e records only. Column names cleaned and normalised.
+    columns:
+      - name: id
+        description: "Unique UUID identifier for each row."
+        data_tests:
+          - unique
+          - not_null
+      - name: factor_name
+        description: "Level 3 activity description."
         data_tests:
           - not_null
-      - name: emission_factor_value
-        description: "CO₂ emission factor in geC/piece."
+      - name: gCO2e_per_unit
+        description: "CO₂ emission factor converted from kg CO₂e to g CO₂e."
         data_tests:
           - not_null
-      - name: uncertainty_pct
-        description: "Uncertainty percentage of the emission factor."
-      - name: notes
-        description: "Additional remarks."
-      - name: source
-        description: "Source system identifier."
-        data_tests:
-          - not_null
-      - name: country_code
-        description: "ISO 3166-1 alpha-2 country code."
-        data_tests:
-          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: " >= 0"
       - name: unit
-        description: "Unit of measurement for the emission factor."
+        description: "Unit of measurement (UOM from source)."
         data_tests:
           - not_null
+      - name: ghg_scope
+        description: "GHG Protocol scope classification."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Scope 3","Scope 1", "Scope 2", "Outside of Scopes"]
+      - name: country_code
+        description: "ISO 3166-1 alpha-2 country code (GL)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["GL","GB"]
+      - name: source
+        description: "Source system identifier (defra)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["defra"]
+      - name: source_year
+        description: "Calendar year extracted from column name."
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 2000 AND 2100"
+      - name: sub_category
+        description: "Level 2 category classification."
+        data_tests:
+          - not_null
+      - name: category
+        description: "Level 1 aggregated category."
+        data_tests:
+          - not_null
+      - name: sub_sub_category
+        description: "Level 4 sub-sub category."
+      - name: column_text
+        description: "Column Text column."
       - name: valid_from
-        description: "Start date of validity period."
+        description: "Start date of validity period (Jan 1 of source year)."
         data_tests:
           - not_null
       - name: valid_to
-        description: "End date of validity period."
+        description: "End date of validity period (Dec 31 of source year)."
         data_tests:
           - not_null
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: valid_from_before_valid_to_defra
+          arguments:
+            expression: "valid_from <= valid_to"

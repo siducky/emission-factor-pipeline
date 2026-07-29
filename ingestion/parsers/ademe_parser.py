@@ -18,7 +18,10 @@ def _get_ademe_url() -> str:
 
 
 def parse_file(url: str | None = None) -> dict[str, bytes]:
-    """Download ADEME Base Carbone CSV, validate every row, return as ``{"2016": csv_bytes}``.
+    """Download ADEME Base Carbone CSV, filter & validate every row, return as ``{"2016": csv_bytes}``.
+
+    Rows with a null/blank emission factor are dropped (logged as warnings).
+    Rows that fail ``AdemeRawRow`` validation raise an error.
 
     Parameters
     ----------
@@ -33,30 +36,45 @@ def parse_file(url: str | None = None) -> dict[str, bytes]:
         content = response.content
     logger.info("Downloaded %d bytes", len(content))
 
-    _validate_csv(content)
+    filtered = _filter_and_validate_csv(content)
 
-    return {"2016": content}
+    return {"2016": filtered}
 
 
-def _validate_csv(raw: bytes) -> None:
-    """Parse CSV bytes and validate every row against ``AdemeRawRow``."""
+def _filter_and_validate_csv(raw: bytes) -> bytes:
+    """Parse CSV, drop rows with null/blank emission factors, validate the rest.
+
+    Returns re-serialized CSV bytes containing only valid rows with a non-empty
+    ``Facteur d'émission`` column.
+    """
     decoded = raw.decode("utf-8-sig")
     reader = csv.DictReader(io.StringIO(decoded))
 
+    fieldnames = reader.fieldnames
+    if not fieldnames:
+        raise ValueError("ADEME CSV has no columns")
+
+    valid_rows: list[dict[str, str]] = []
     errors: list[str] = []
+    skipped = 0
     row_count = 0
+
     for row_num, row in enumerate(reader, start=2):
         row_count += 1
         ef = row.get("Facteur d'émission", "")
         if not ef or not ef.strip():
+            skipped += 1
+            logger.warning(
+                "Row %d: missing 'Facteur d'émission', skipping", row_num)
             continue
         try:
             AdemeRawRow.model_validate(row)
+            valid_rows.append(row)
         except Exception as e:
             errors.append(f"Row {row_num}: {e}")
 
     if row_count == 0:
-        raise ValueError("ADEME CSV is empty — no rows to validate")
+        raise ValueError("ADEME CSV is empty — no rows to parse")
 
     if errors:
         summary = "\n".join(errors[:20])
@@ -67,10 +85,22 @@ def _validate_csv(raw: bytes) -> None:
             f"ADEME CSV validation failed: {len(errors)} / {row_count} rows invalid.\n{summary}"
         )
 
-    logger.info("ADEME CSV validated: %d rows OK", row_count)
+    logger.info(
+        "ADEME CSV processed: %d valid, %d skipped (null EF), %d total rows",
+        len(valid_rows),
+        skipped,
+        row_count,
+    )
+
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=fieldnames, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(valid_rows)
+    return buf.getvalue().encode("utf-8")
 
 
 if __name__ == "__main__":
     from ingestion.logging_config import setup_logging
+
     setup_logging()
     result = parse_file()

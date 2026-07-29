@@ -1,47 +1,26 @@
-WITH source AS (
-    SELECT * FROM {{ source('bronze', 'defra') }}
+with source as (
+    select * from {{ source('bronze', 'defra') }}
+    where "GHG/Unit" = 'kg CO2e'
+      and "GHG Conversion Factor" is not null
 ),
 
-extracted AS (
-    SELECT *,
-        CAST(
-            REGEXP_EXTRACT(
-                alias(COLUMNS('GHG Conversion Factor*')), 
-                '\d{4}'
-            ) AS INTEGER
-        ) AS source_year
-    FROM source
-    WHERE "GHG/Unit" = 'kg CO2e'
-),
-
-renamed AS (
-    SELECT
-        uuid() AS id,
-        CAST("Level 3" AS VARCHAR) AS factor_name,
-        CONCAT('Emission factor for ', "Level 3",
-                CASE WHEN "Level 4" IS NOT NULL OR "Column Text" IS NOT NULL
-                    THEN ' (' || COALESCE("Level 4", '') || COALESCE(' ' || "Column Text", '') || ')' 
-                    ELSE ''
-                END,
-                ' mapped to category ', "Level 2",
-                 ' and aggregated category ', "Level 1") AS description,
-                 
-        -- Added the '*' wildcard here
-        CAST(COLUMNS('GHG Conversion Factor*') AS DOUBLE PRECISION) / 1000.0 AS gCO2e_per_unit,
-        
-        CAST(UOM AS VARCHAR) AS unit,
-        CAST(Scope AS VARCHAR) AS ghg_scope,
-        'GL' AS country_code,
-        'defra' AS source,
-        source_year,
-        CAST("Level 2" AS VARCHAR) AS category,
-        CAST("Level 1" AS VARCHAR) AS aggregated_category,
-        make_date(source_year, 1, 1) AS valid_from,
-        make_date(source_year, 12, 31) AS valid_to
-    FROM extracted
-    
-    -- Added the '*' wildcard here as well
-    WHERE COLUMNS('GHG Conversion Factor*') IS NOT NULL
+renamed as (
+    select
+        uuid() as id,
+        cast("Level 3" as varchar) as factor_name,
+        cast("GHG Conversion Factor" as double precision) * 1000.0 as gCO2e_per_unit,
+        cast(uom as varchar) as unit,
+        cast(scope as varchar) as ghg_scope,
+        'GL' as country_code,
+        'defra' as source,
+        cast(year as integer) as source_year,
+        make_date(cast(year as integer), 1, 1) as valid_from,
+        make_date(cast(year as integer), 12, 31) as valid_to,
+        cast("Level 2" as varchar) as sub_category,
+        cast("Level 1" as varchar) as category,
+        cast("Level 4" as varchar) as sub_sub_category,
+        cast("Column Text" as varchar) as column_text
+    from source
 )
 
-SELECT * FROM renamed
+select * from renamed

@@ -79,9 +79,9 @@ def parse_file(url: str | None = None) -> dict[str, bytes]:
     for sheet_name, df in sheets.items():
         name_lower = str(sheet_name).lower()
         if "varedeklarasjon" in name_lower:
-            factor_type = "Market-based emission factor for Norwegian electricity consumption"
+            factor_type = "Market-based"
         elif "klimadeklarasjon" in name_lower:
-            factor_type = "Location-based emission factor for Norwegian electricity consumption"
+            factor_type = "Location-based"
         else:
             logger.debug("Skipping sheet '%s' (no match)", sheet_name)
             continue
