@@ -9,7 +9,7 @@ renamed as (
         cast("Facteur d'émission" as double precision) as gCO2e_per_unit,
         'piece' as unit,
         'Scope 3' as ghg_scope,
-        'GL' as country_code,
+        'GLOBAL' as country_code,
         'ademe' as source,
         2016 as source_year,
         date '2016-01-01' as valid_from,

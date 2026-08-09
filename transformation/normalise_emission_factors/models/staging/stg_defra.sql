@@ -8,10 +8,10 @@ renamed as (
     select
         uuid() as id,
         cast("Level 3" as varchar) as factor_name,
-        cast("GHG Conversion Factor" as double precision) * 1000.0 as gCO2e_per_unit,
+        round(cast("GHG Conversion Factor" as double precision), 3) * 1000.0 as gCO2e_per_unit,
         cast(uom as varchar) as unit,
         cast(scope as varchar) as ghg_scope,
-        'GL' as country_code,
+        'GLOBAL' as country_code,
         'defra' as source,
         cast(year as integer) as source_year,
         make_date(cast(year as integer), 1, 1) as valid_from,

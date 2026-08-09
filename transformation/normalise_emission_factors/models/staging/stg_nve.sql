@@ -4,7 +4,7 @@ with source as (
 renamed as (
     select
         uuid() as id,
-        concat('Electricity - ',factor_type) as factor_name,
+        concat('Electricity (',factor_type, ')') as factor_name,
         cast(co2_per_kWh as double precision) as gCO2e_per_unit,
         'kWh' as unit,
         'Scope 2' as ghg_scope,

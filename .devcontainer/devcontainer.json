@@ -21,9 +21,7 @@
     ],
     "runArgs": [
         "--env-file",
-        "${localWorkspaceFolder}/.env",
-        "--memory=6g",
-        "--memory-swap=8g"
+        "${localWorkspaceFolder}/.env"
     ],
     "remoteEnv": {
         "UV_LINK_MODE": "copy"

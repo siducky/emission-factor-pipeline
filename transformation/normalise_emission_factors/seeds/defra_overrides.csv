@@ -1,0 +1,34 @@
+category,sub_category,should_drop
+"Managed assets- vehicles","Managed motorbikes",true
+"Managed assets- electricity","Electricity generated",true
+"Managed assets- vehicles","Managed HGV refrigerated (all diesel)",true
+"Managed assets- vehicles","Managed HGV (all diesel)",true
+"Managed assets- vehicles","Managed vans",true
+"Managed assets- vehicles","Managed cars (by size)",true
+"Managed assets- vehicles","Managed cars (by market segment)",true
+"Managed assets- electricity","Electricity generated",true
+"SECR kWh pass & delivery vehs","Cars (by market segment)",true
+"SECR kWh pass & delivery vehs","Cars (by size)",true
+"SECR kWh pass & delivery vehs","Vans",true
+"SECR kWh pass & delivery vehs","Motorbike",true
+"SECR kWh pass & delivery vehs","HGV (all diesel)",true
+"SECR kWh pass & delivery vehs","HGV refrigerated (all diesel)",true
+"SECR kWh UK electricity for EVs","Cars (by market segment)",true
+"SECR kWh UK electricity for EVs","Cars (by size)",true
+"SECR kWh UK electricity for EVs","Vans",true
+"UK electricity T&D for EVs","Cars (by market segment)",true
+"UK electricity T&D for EVs","Cars (by size)",true
+"UK electricity T&D for EVs","Vans",true
+"Business travel- land","Motorbike",true
+"Business travel- land","Cars (by size)",true
+"Business travel- land","Cars (by market segment)",true
+"Outside of scopes","Biofuel",true
+"Outside of scopes","Biomass",true
+"Outside of scopes","Biogas",true
+"Outside of scopes","Electricity generated",true
+"UK electricity for EVs","Cars (by market segment)",true
+"UK electricity for EVs","Cars (by size)",true
+"UK electricity for EVs","Vans",true
+"Freighting goods","Vans",true
+"Freighting goods","HGV (all diesel)",true
+"Freighting goods","HGV refrigerated (all diesel)",true
