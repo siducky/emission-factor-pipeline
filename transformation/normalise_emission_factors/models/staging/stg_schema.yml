@@ -83,7 +83,7 @@ models:
   - name: stg_ademe
     description: >
       Staging model for ADEME Base Carbone — French emission factors
-      for sports equipment. Column names translated from French to English.
+      for sports equipment.
     columns:
       - name: id
         description: "Unique identifier for each product."
@@ -121,7 +121,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: ["GL"]
+                values: ["GLOBAL"]
       - name: source
         description: "Source system identifier (ademe)."
         data_tests:
@@ -198,7 +198,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: ["GL","GB"]
+                values: ["GLOBAL"]
       - name: source
         description: "Source system identifier (defra)."
         data_tests:

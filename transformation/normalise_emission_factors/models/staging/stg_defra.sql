@@ -6,7 +6,7 @@ with source as (
 
 renamed as (
     select
-        uuid() as id,
+        md5(concat_ws('|', 'defra', cast(ID as varchar), cast(year as integer))) as id,
         cast("Level 3" as varchar) as factor_name,
         round(cast("GHG Conversion Factor" as double precision), 3) * 1000.0 as gCO2e_per_unit,
         cast(uom as varchar) as unit,

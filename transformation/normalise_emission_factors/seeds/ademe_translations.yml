@@ -1,0 +1,28 @@
+version: 2
+
+seeds:
+  - name: ademe_translations
+    description: >-
+      ADEME French->English name lookup. Rows with a non-empty `federation` are
+      sport-specific translations (needed because one French product name maps to a
+      different English name per federation, e.g. `Ballon` -> Basketball/Football/
+      Handball/Rugby); rows with an empty `federation` apply to any federation.
+    config:
+      column_types:
+        federation: varchar
+    columns:
+      - name: factor_name_fr
+        description: ADEME French factor name (raw `Produit à l'unité`).
+      - name: factor_name_en
+        description: English factor name used downstream as the standardised name.
+      - name: federation
+        description: >-
+          ADEME federation short name (e.g. `FOOTBALL`). Empty means the translation
+          applies to any federation; populated means it applies only to that federation.
+    tests:
+      # Guard the exact key used by `imt_ademe_cleaned`: one row per (name, federation).
+      # Coalesce turns generic rows (NULL federation) into '', so concat never collides.
+      - unique:
+          column_name: "concat(trim(factor_name_fr), '¦', coalesce(federation, ''))"
+      - not_null:
+          column_name: factor_name_fr

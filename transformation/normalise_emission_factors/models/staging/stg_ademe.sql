@@ -4,7 +4,7 @@ with source as (
 
 renamed as (
     select
-        uuid() as id,
+        md5(concat_ws('|', 'ademe', cast(__id as varchar))) as id,
         cast("Produit à l'unité" as varchar) as factor_name,
         cast("Facteur d'émission" as double precision) as gCO2e_per_unit,
         'piece' as unit,

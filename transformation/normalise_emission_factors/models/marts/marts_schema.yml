@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: dim_emission_factors
+    description: >
+      Gold-layer dimension of normalised emission factors from ADEME, DEFRA and NVE.
+      Snapshot-style (one row per factor and validity period).
+    columns:
+      - name: ef_id
+        description: "Stable MD5 surrogate key over the natural key + source year."
+        data_tests:
+          - unique
+          - not_null
+      - name: source
+        description: "Source system identifier (ademe | defra | nve)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["ademe", "defra", "nve"]
+      - name: factor_name
+        data_tests:
+          - not_null
+      - name: gCO2e_per_unit
+        description: >-
+          GHG emissions per `unit`. Zero is legitimate — DEFRA reports 0 for
+          e.g. battery-electric vehicles and landfill gas. Only negative values
+          are invalid.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: unit
+        data_tests:
+          - not_null
+      - name: ghg_scope
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Scope 1", "Scope 2", "Scope 3", "Outside of Scopes"]
+      - name: country_code
+        description: "ISO 3166-1 alpha-2; GLOBAL for aggregate/multi-country factors."
+        data_tests:
+          - not_null
+      - name: country_level
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["global", "national", "other"]
+      - name: source_year
+        data_tests:
+          - not_null
+      - name: valid_from
+        data_tests:
+          - not_null
+      - name: valid_to
+        data_tests:
+          - not_null
+      - name: is_current
+        data_tests:
+          - not_null
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: valid_from_before_valid_to
+          arguments:
+            expression: "valid_from <= valid_to"

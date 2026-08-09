@@ -12,6 +12,7 @@ joined as (
     from ademe a
     left join translations t
     on t.factor_name_fr = a.factor_name
+    and (t.federation is null or t.federation = a.federation)
 ),
 ademe_cleaned as (
     select

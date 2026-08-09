@@ -3,7 +3,7 @@ with source as (
 ),
 renamed as (
     select
-        uuid() as id,
+        md5(concat_ws('|', 'nve', lower(factor_type), cast(year as integer))) as id,
         concat('Electricity (',factor_type, ')') as factor_name,
         cast(co2_per_kWh as double precision) as gCO2e_per_unit,
         'kWh' as unit,

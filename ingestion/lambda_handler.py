@@ -3,7 +3,8 @@ import os
 import time
 
 import boto3
-from parsers import ademe_parser, defra_parser, nve_parser
+
+from ingestion.parsers import ademe_parser, defra_parser, nve_parser
 
 logger = logging.getLogger(__name__)
 s3_client = boto3.client("s3")
