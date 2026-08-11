@@ -21,10 +21,11 @@
 ## Blocked / risks
 - **ADEME translation fan-out - FIXED:** seed keyed by `(federation, factor_name_fr)`; NULL-federation = wildcard; 1,960 rows / 1,960 unique `ef_id`; guarded by seed uniqueness test.
 - **Import packaging risk - FIXED:** `lambda_handler.py` uses `from ingestion.parsers import ...`.
-- **CI -> RDS reachability (OPEN):** GitHub `ubuntu-latest` runner may not reach a private-VPC RDS; needs security-group/VPC config.
+- **CI -> RDS reachability (OPEN):** GitHub `ubuntu-latest` runner may not reach a private-VPC RDS; needs security-group/VPC config. First CI run reached the loader (ATTACH attempted) - network path partially works; final load success pending.
 - **`imt_defra_cleaned.sql` WIP - FIXED:** Motorbike/WTT-* factor_name tweaks committed in `a527ad0`; re-run `dbt build` + reload before relying on row content.
-- **`DB_*` secrets (OPEN):** workflow reads `secrets.DB_*` from GitHub Actions secrets; local `.env` alone does NOT reach CI.
+- **`DB_*` secrets - FIXED:** added to GitHub repo secrets (not environment secrets - workflow has no `environment:` key).
 - **Stray artifacts - FIXED:** `q` (psql dump) + `,` (0-byte) removed from repo + gitignored.
+- **CI test failures - FIXED (2026-08-11):** stale `country_level` test removed (`cff2fe2`); `DB_PORT` empty-string bug (`9317de0`); `DUCKDB_PATH` ref_name mismatch (`92daab6`).
 
 ## Environment / build state
 - Python `>=3.11`, uv-managed. `dev.duckdb` in repo (now gitignored `*.duckdb`).

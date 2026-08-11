@@ -22,13 +22,17 @@ RDS Gold serving layer wired + committed. `marts.dim_emission_factors` live on R
 - Test: loader ran directly against the real RDS using existing `DB_*` env vars (no local Postgres install; no `.env.example` changes).
 
 ## Flagged (not yet fixed)
-- **CI -> RDS reachability (OPEN):** GitHub `ubuntu-latest` runner may not reach a private-VPC RDS; needs security-group allow / public access / bastion for GitHub egress.
-- **`DB_*` secrets (OPEN):** workflow reads `secrets.DB_*` from GitHub Actions secrets. Local `.env` alone does NOT reach CI - must add `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` to repo secrets (plus `AWS_*` already referenced).
+- **CI -> RDS reachability (OPEN):** GitHub `ubuntu-latest` runner may not reach a private-VPC RDS; needs security-group allow / public access / bastion for GitHub egress. First CI run reached the loader (ATTACH attempted) - so network path partially works; final load success pending.
+
+## CI fixes applied (2026-08-11)
+- `cff2fe2 remove redundant country_level block`: deleted stale `country_level` accepted_values test from `marts_schema.yml` (column doesn't exist; mart has `country_code`). CI clean build caught it (local dev.duckdb was stale).
+- `9317de0 update port`: `load_gold_to_rds.py` `os.getenv("DB_PORT") or "5432"` - GitHub injects empty string for unset secret, `os.getenv` default doesn't cover empty.
+- `92daab6 fix DUCKDB_PATH`: workflow now always `dev.duckdb` (dbt build uses `--target dev`); removed `ref_name == 'main'` conditional that pointed at non-existent `normalise_emission_factors.duckdb`.
+- Workflow now uses `astral-sh/setup-uv` + `uv pip install --system .` (commits `a42e227`, `154ac94`).
 
 ## Next actions (proposed)
-- Add `DB_*` (and `AWS_*`) to GitHub repo secrets.
-- Confirm RDS reachable from GitHub runner (public access or security-group allow); trigger workflow_dispatch to verify end-to-end.
-- Optional: full `dbt build` on a clean checkout (idempotency confirmation after DEFRA tweaks).
+- Confirm latest workflow run green (dbt tests + RDS load).
+- If RDS load still fails: check VPC/security-group reachability from GitHub runner.
 
 ## Open questions
 - (resolved) Gold export target - DuckDB-attach loader.
