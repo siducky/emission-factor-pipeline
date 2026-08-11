@@ -93,7 +93,7 @@ def _redact(message: str, secret: str) -> str:
 def _connect_string() -> str:
     parts = {
         "host": _require_env("DB_HOST"),
-        "port": os.getenv("DB_PORT", "5432"),
+        "port": os.getenv("DB_PORT") or "5432",
         "dbname": _require_env("DB_NAME"),
         "user": _require_env("DB_USER"),
         "password": _require_env("DB_PASSWORD"),
