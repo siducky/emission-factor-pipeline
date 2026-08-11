@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# DuckDB local databases (build artifacts)
+*.duckdb
+*.duckdb.wal
+
+# dbt logs
+transformation/normalise_emission_factors/logs/

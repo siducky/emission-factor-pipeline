@@ -7,7 +7,7 @@ nve_cleaned as (
     select
     id,
     factor_name,
-    concat('GHG Emission factor for ', factor_name, ' beloning to category Energy') as description,
+    concat('GHG Emission factor for ', factor_name, ' belonging to category Energy') as description,
     gCO2e_per_unit,
     unit,
     ghg_scope,

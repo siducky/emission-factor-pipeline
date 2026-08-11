@@ -1,6 +1,47 @@
-- name: Configure AWS Credentials
-  uses: aws-actions/configure-aws-credentials@v4
-  with:
-    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    aws-region: ${{ secrets.AWS_REGION }}
+name: ETL Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  transform-and-load:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt + DuckDB
+        run: |
+          pip install --quiet "dbt-core>=1.12.0" "dbt-duckdb>=1.10.1" "duckdb>=1.5.5"
+
+      # Ingest runs as an independent AWS Lambda (bronze -> S3); not part of
+      # this workflow. Credentials are only needed so dbt can read bronze
+      # parquet/csv via the DuckDB httpfs extension.
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: dbt build -> Gold into DuckDB
+        working-directory: transformation/normalise_emission_factors
+        run: |
+          dbt deps
+          dbt build --target dev
+
+      - name: Load Gold into RDS Postgres
+        run: python transformation/load_gold_to_rds.py
+        env:
+          DUCKDB_PATH: transformation/normalise_emission_factors/dev.duckdb
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
