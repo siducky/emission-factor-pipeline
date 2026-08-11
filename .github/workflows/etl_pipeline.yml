@@ -45,7 +45,7 @@ jobs:
       - name: Load Gold into RDS Postgres
         run: python transformation/load_gold_to_rds.py
         env:
-          DUCKDB_PATH: transformation/normalise_emission_factors/${{ github.ref_name == 'main' && 'normalise_emission_factors.duckdb' || 'dev.duckdb' }}
+          DUCKDB_PATH: transformation/normalise_emission_factors/dev.duckdb
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
