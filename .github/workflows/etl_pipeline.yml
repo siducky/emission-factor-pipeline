@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+  pull_request: 
 
 jobs:
   transform-and-load:
@@ -43,6 +44,7 @@ jobs:
           dbt build --target dev
 
       - name: Load Gold into RDS Postgres
+        if: github.ref_name == 'main'
         run: python transformation/load_gold_to_rds.py
         env:
           DUCKDB_PATH: transformation/normalise_emission_factors/dev.duckdb
