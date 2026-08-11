@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# DuckDB local databases (build artifacts)
+*.duckdb
+*.duckdb.wal
+
+# Stray psql/CLI output files (accidentally committed)
+q
+,
+
+# dbt logs
+transformation/normalise_emission_factors/logs/
