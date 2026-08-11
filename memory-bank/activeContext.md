@@ -30,6 +30,9 @@ RDS Gold serving layer wired + committed. `marts.dim_emission_factors` live on R
 - `92daab6 fix DUCKDB_PATH`: workflow now always `dev.duckdb` (dbt build uses `--target dev`); removed `ref_name == 'main'` conditional that pointed at non-existent `normalise_emission_factors.duckdb`.
 - Workflow now uses `astral-sh/setup-uv` + `uv pip install --system .` (commits `a42e227`, `154ac94`).
 
+## Docs (2026-08-11)
+- `README.md` replaced 2-line stub with full repo doc: overview, architecture diagram, medallion layering, data sources, repo structure, quick start, usage (ingest/transform/serve), CI pipeline, engineering invariants, output schema, env vars, known limitations.
+
 ## Next actions (proposed)
 - Confirm latest workflow run green (dbt tests + RDS load).
 - If RDS load still fails: check VPC/security-group reachability from GitHub runner.
