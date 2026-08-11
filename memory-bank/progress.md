@@ -37,5 +37,8 @@
 - `add marts model` (8e3b40e)
 - `add intermediate models` (25db322), `staging models` (d644d71), `add transformation` (0482cf7), ingestion work (lambda/parsers/ademe)
 
+## Docs
+- `README.md` full rewrite (2026-08-11): architecture, quick start, sources, usage, CI, schema, env vars, limitations.
+
 ## Memory-bank init
 - `memory-bank/` seeded on branch `transformation_imt`. This session: RDS Gold load wired + verified + committed (`a527ad0`, branch `create-rds`); stray artifacts cleaned.
