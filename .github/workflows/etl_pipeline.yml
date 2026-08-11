@@ -15,10 +15,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
 
       - name: Install dbt + DuckDB
         run: |
-          pip install --quiet "dbt-core>=1.12.0" "dbt-duckdb>=1.10.1" "duckdb>=1.5.5"
+          pip install --quiet "dbt-core=1.12.0" "dbt-duckdb=1.10.1" "duckdb=1.5.5"
 
       # Ingest runs as an independent AWS Lambda (bronze -> S3); not part of
       # this workflow. Credentials are only needed so dbt can read bronze
@@ -39,7 +44,7 @@ jobs:
       - name: Load Gold into RDS Postgres
         run: python transformation/load_gold_to_rds.py
         env:
-          DUCKDB_PATH: transformation/normalise_emission_factors/dev.duckdb
+          DUCKDB_PATH: transformation/normalise_emission_factors/${{ github.ref_name == 'main' && 'normalise_emission_factors.duckdb' || 'dev.duckdb' }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
