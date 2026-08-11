@@ -221,5 +221,9 @@ __marimo__/
 *.duckdb
 *.duckdb.wal
 
+# Stray psql/CLI output files (accidentally committed)
+q
+,
+
 # dbt logs
 transformation/normalise_emission_factors/logs/

@@ -22,7 +22,9 @@
 - **ADEME translation fan-out - FIXED:** seed keyed by `(federation, factor_name_fr)`; NULL-federation = wildcard; 1,960 rows / 1,960 unique `ef_id`; guarded by seed uniqueness test.
 - **Import packaging risk - FIXED:** `lambda_handler.py` uses `from ingestion.parsers import ...`.
 - **CI -> RDS reachability (OPEN):** GitHub `ubuntu-latest` runner may not reach a private-VPC RDS; needs security-group/VPC config.
-- **`imt_defra_cleaned.sql` WIP (OPEN):** uncommitted Motorbike/WTT-* factor_name tweaks - re-run `dbt build` + reload before relying on row content.
+- **`imt_defra_cleaned.sql` WIP - FIXED:** Motorbike/WTT-* factor_name tweaks committed in `a527ad0`; re-run `dbt build` + reload before relying on row content.
+- **`DB_*` secrets (OPEN):** workflow reads `secrets.DB_*` from GitHub Actions secrets; local `.env` alone does NOT reach CI.
+- **Stray artifacts - FIXED:** `q` (psql dump) + `,` (0-byte) removed from repo + gitignored.
 
 ## Environment / build state
 - Python `>=3.11`, uv-managed. `dev.duckdb` in repo (now gitignored `*.duckdb`).
@@ -35,4 +37,4 @@
 - `add intermediate models` (25db322), `staging models` (d644d71), `add transformation` (0482cf7), ingestion work (lambda/parsers/ademe)
 
 ## Memory-bank init
-- `memory-bank/` seeded on branch `transformation_imt`. This session: RDS Gold load wired + verified (branch `create-rds`, uncommitted).
+- `memory-bank/` seeded on branch `transformation_imt`. This session: RDS Gold load wired + verified + committed (`a527ad0`, branch `create-rds`); stray artifacts cleaned.
