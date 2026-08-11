@@ -20,10 +20,11 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
 
-      - name: Install dbt + DuckDB
+      - name: Install dependencies with uv
         run: |
-          pip install --quiet "dbt-core=1.12.0" "dbt-duckdb=1.10.1" "duckdb=1.5.5"
+          uv pip install --system .
 
       # Ingest runs as an independent AWS Lambda (bronze -> S3); not part of
       # this workflow. Credentials are only needed so dbt can read bronze
